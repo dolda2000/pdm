@@ -1,0 +1,40 @@
+#!/usr/bin/python
+
+import sys, getopt, readline
+import pdm.cli
+
+def usage(out):
+    out.write("usage: pdm-repl [-h] SOCKET\n")
+
+opts, args = getopt.getopt(sys.argv[1:], "h")
+for o, a in opts:
+    if o == "-h":
+        usage(sys.stdout)
+        sys.exit(0)
+if len(args) < 1:
+    usage(sys.stderr)
+    sys.exit(1)
+cl = pdm.cli.replclient(args[0])
+
+buf = ""
+while True:
+    try:
+        if buf != "":
+            line = raw_input("  ")
+        else:
+            line = raw_input("% ")
+    except EOFError:
+        break
+    if line == "":
+        sys.stdout.write(cl.run(buf))
+        buf = ""
+    else:
+        if buf == "":
+            try:
+                compile(line, "Nought", "eval")
+            except:
+                pass
+            else:
+                sys.stdout.write(cl.run(line))
+                continue
+        buf += line + "\n"
