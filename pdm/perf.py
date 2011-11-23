@@ -1,4 +1,4 @@
-import os, sys, resource, time, socket
+import os, sys, resource, time, socket, threading
 
 class attrinfo(object):
     def __init__(self, desc = None):
@@ -97,6 +97,25 @@ class staticdir(perfobj):
 class event(object):
     def __init__(self):
         self.time = time.time()
+
+idlock = threading.Lock()
+procevid = 0
+class startevent(event):
+    def __init__(self):
+        super(startevent, self).__init__()
+        global procevid
+        idlock.acquire()
+        try:
+            self.id = procevid
+            procevid += 1
+        finally:
+            idlock.release()
+
+class finishevent(event):
+    def __init__(self, start, aborted):
+        super(finishevent, self).__init__()
+        self.id = start.id
+        self.aborted = aborted
 
 sysres = staticdir()
 itime = time.time()
