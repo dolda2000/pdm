@@ -100,21 +100,32 @@ class event(object):
 
 idlock = threading.Lock()
 procevid = 0
-class startevent(event):
-    def __init__(self):
-        super(startevent, self).__init__()
-        global procevid
-        idlock.acquire()
-        try:
-            self.id = procevid
-            procevid += 1
-        finally:
-            idlock.release()
 
-class finishevent(event):
+def getprocid():
+    global procevid
+    idlock.acquire()
+    try:
+        ret = procevid
+        procevid += 1
+        return ret
+    finally:
+        idlock.release()
+
+class procevent(event):
+    def __init__(self, id):
+        super(procevent, self).__init__()
+        if isinstance(id, procevent):
+            self.id = id.id
+        else:
+            self.id = id
+
+class startevent(procevent):
+    def __init__(self):
+        super(startevent, self).__init__(getprocid())
+
+class finishevent(procevent):
     def __init__(self, start, aborted):
-        super(finishevent, self).__init__()
-        self.id = start.id
+        super(finishevent, self).__init__(start)
         self.aborted = aborted
 
 sysres = staticdir()
