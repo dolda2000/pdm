@@ -136,7 +136,7 @@ class perfproxy(object):
             self.cl.run("subs", self.id)
         self.subscribers.add(cb)
 
-    def unsubscribe(self):
+    def unsubscribe(self, cb):
         if cb not in self.subscribers:
             raise ValueError("Not subscribed")
         self.subscribers.remove(cb)
