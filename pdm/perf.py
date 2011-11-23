@@ -94,6 +94,10 @@ class staticdir(perfobj):
     def pdm_protocols(self):
         return super(staticdir, self).pdm_protocols() + ["dir"]
 
+class event(object):
+    def __init__(self):
+        self.time = time.time()
+
 sysres = staticdir()
 itime = time.time()
 ires = resource.getrusage(resource.RUSAGE_SELF)
