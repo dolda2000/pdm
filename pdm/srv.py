@@ -18,33 +18,34 @@ class repl(object):
         self.mod = types.ModuleType("repl")
         self.mod.echo = self.echo
         self.printer = pprint.PrettyPrinter(indent = 4, depth = 6)
-        cl.send("+REPL\n")
+        cl.send(b"+REPL\n")
 
     def sendlines(self, text):
         for line in text.split("\n"):
-            self.cl.send(" " + line + "\n")
+            self.cl.send(b" " + line.encode("utf-8") + b"\n")
 
     def echo(self, ob):
         self.sendlines(self.printer.pformat(ob))
 
     def command(self, cmd):
+        cmd = cmd.decode("utf-8")
         try:
             try:
                 ccode = compile(cmd, "PDM Input", "eval")
             except SyntaxError:
                 ccode = compile(cmd, "PDM Input", "exec")
                 exec(ccode, self.mod.__dict__)
-                self.cl.send("+OK\n")
+                self.cl.send(b"+OK\n")
             else:
                 self.echo(eval(ccode, self.mod.__dict__))
-                self.cl.send("+OK\n")
+                self.cl.send(b"+OK\n")
         except:
             for line in traceback.format_exception(*sys.exc_info()):
-                self.cl.send(" " + line)
-            self.cl.send("+EXC\n")
+                self.cl.send(b" " + line.encode("utf-8"))
+            self.cl.send(b"+EXC\n")
 
     def handle(self, buf):
-        p = buf.find("\n\n")
+        p = buf.find(b"\n\n")
         if p < 0:
             return buf
         cmd = buf[:p + 1]
@@ -56,7 +57,7 @@ class perf(object):
     def __init__(self, cl):
         self.cl = cl
         self.odtab = {}
-        cl.send("+PERF1\n")
+        cl.send(b"+PERF1\n")
         self.buf = ""
         self.lock = threading.Lock()
         self.subscribed = {}
@@ -250,6 +251,10 @@ class client(threading.Thread):
         return self.sk.send(data)
 
     def choose(self, proto):
+        try:
+            proto = proto.decode("ascii")
+        except UnicodeError:
+            proto = None
         if proto in protocols:
             self.handler = protocols[proto](self)
         else:
@@ -257,7 +262,7 @@ class client(threading.Thread):
             raise Exception()
 
     def handle(self, buf):
-        p = buf.find("\n")
+        p = buf.find(b"\n")
         if p >= 0:
             proto = buf[:p]
             buf = buf[p + 1:]
@@ -266,24 +271,24 @@ class client(threading.Thread):
 
     def run(self):
         try:
-            buf = ""
-            self.send("+PDM1\n")
+            buf = b""
+            self.send(b"+PDM1\n")
             while True:
                 ret = self.sk.recv(1024)
-                if ret == "":
+                if ret == b"":
                     return
                 buf += ret
                 while True:
                     try:
                         nbuf = self.handler.handle(buf)
                     except:
+                        #for line in traceback.format_exception(*sys.exc_info()):
+                        #    print(line)
                         return
                     if nbuf == buf:
                         break
                     buf = nbuf
         finally:
-            #for line in traceback.format_exception(*sys.exc_info()):
-            #    print line
             try:
                 self.sk.close()
             finally:

@@ -37,9 +37,9 @@ def resolve(spec):
 class client(object):
     def __init__(self, sk, proto = None):
         self.sk = resolve(sk)
-        self.buf = ""
+        self.buf = b""
         line = self.readline()
-        if line != "+PDM1":
+        if line != b"+PDM1":
             raise protoerr("Illegal protocol signature")
         if proto is not None:
             self.select(proto)
@@ -49,22 +49,24 @@ class client(object):
 
     def readline(self):
         while True:
-            p = self.buf.find("\n")
+            p = self.buf.find(b"\n")
             if p >= 0:
                 ret = self.buf[:p]
                 self.buf = self.buf[p + 1:]
                 return ret
             ret = self.sk.recv(1024)
-            if ret == "":
+            if ret == b"":
                 return None
             self.buf += ret
 
     def select(self, proto):
-        if "\n" in proto:
+        if isinstance(proto, str):
+            proto = proto.encode("ascii")
+        if b"\n" in proto:
             raise Exception("Illegal protocol specified: %r" % proto)
-        self.sk.send(proto + "\n")
+        self.sk.send(proto + b"\n")
         rep = self.readline()
-        if len(rep) < 1 or rep[0] != "+":
+        if len(rep) < 1 or rep[0] != b"+"[0]:
             raise protoerr("Error reply when selecting protocol %s: %s" % (proto, rep[1:]))
 
     def __enter__(self):
@@ -85,16 +87,16 @@ class replclient(client):
             code = ncode
         while len(code) > 0 and code[-1] == "\n":
             code = code[:-1]
-        self.sk.send(code + "\n\n")
-        buf = ""
+        self.sk.send((code + "\n\n").encode("utf-8"))
+        buf = b""
         while True:
             ln = self.readline()
-            if ln[0] == " ":
-                buf += ln[1:] + "\n"
-            elif ln[0] == "+":
-                return buf
-            elif ln[0] == "-":
-                raise protoerr("Error reply: %s" % ln[1:])
+            if ln[0] == b" "[0]:
+                buf += ln[1:] + b"\n"
+            elif ln[0] == b"+"[0]:
+                return buf.decode("utf-8")
+            elif ln[0] == b"-"[0]:
+                raise protoerr("Error reply: %s" % ln[1:].decode("utf-8"))
             else:
                 raise protoerr("Illegal reply: %s" % ln)
 
@@ -174,10 +176,10 @@ class perfclient(client):
         self.sk.send(buf)
 
     def recvb(self, num):
-        buf = ""
+        buf = b""
         while len(buf) < num:
             data = self.sk.recv(num - len(buf))
-            if data == "":
+            if data == b"":
                 raise EOFError()
             buf += data
         return buf
