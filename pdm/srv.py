@@ -33,7 +33,7 @@ class repl(object):
                 ccode = compile(cmd, "PDM Input", "eval")
             except SyntaxError:
                 ccode = compile(cmd, "PDM Input", "exec")
-                exec ccode in self.mod.__dict__
+                exec(ccode, self.mod.__dict__)
                 self.cl.send("+OK\n")
             else:
                 self.echo(eval(ccode, self.mod.__dict__))
@@ -62,7 +62,7 @@ class perf(object):
         self.subscribed = {}
 
     def closed(self):
-        for id, recv in self.subscribed.iteritems():
+        for id, recv in self.subscribed.items():
             ob = self.odtab[id]
             if ob is None: continue
             ob, protos = ob
@@ -84,7 +84,7 @@ class perf(object):
             raise ValueError("Object does not support PDM introspection")
         try:
             proto = ob.pdm_protocols()
-        except Exception, exc:
+        except Exception as exc:
             raise ValueError("PDM introspection failed", exc)
         self.odtab[id] = ob, proto
         return proto
@@ -101,7 +101,7 @@ class perf(object):
             return
         try:
             proto = self.bindob(id, ob)
-        except Exception, exc:
+        except Exception as exc:
             self.send("-", exc)
             return
         self.send("+", proto)
@@ -123,12 +123,12 @@ class perf(object):
             return
         try:
             ob = src.lookup(obnm)
-        except KeyError, exc:
+        except KeyError as exc:
             self.send("-", exc)
             return
         try:
             proto = self.bindob(tgtid, ob)
-        except Exception, exc:
+        except Exception as exc:
             self.send("-", exc)
             return
         self.send("+", proto)
@@ -158,7 +158,7 @@ class perf(object):
             return
         try:
             ret = ob.readattr()
-        except Exception, exc:
+        except Exception as exc:
             self.send("-", Exception("Could not read attribute"))
             return
         self.send("+", ret)
@@ -175,7 +175,7 @@ class perf(object):
             return
         try:
             self.send("+", ob.invoke(method, *args, **kwargs))
-        except Exception, exc:
+        except Exception as exc:
             self.send("-", exc)
 
     def event(self, id, ob, ev):
@@ -314,7 +314,7 @@ class listener(threading.Thread):
         cl.start()
 
 class unixlistener(listener):
-    def __init__(self, name, mode = 0600, group = None):
+    def __init__(self, name, mode = 0o600, group = None):
         super(unixlistener, self).__init__()
         self.name = name
         self.mode = mode
@@ -362,7 +362,7 @@ def listen(spec):
         last = spec
     if "/" in first:
         parts = spec.split(":")
-        mode = 0600
+        mode = 0o600
         group = None
         if len(parts) > 1:
             mode = int(parts[1], 0)

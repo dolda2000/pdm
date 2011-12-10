@@ -86,7 +86,7 @@ class staticdir(perfobj):
         return self.map.get(name, default)
 
     def listdir(self):
-        return self.map.keys()
+        return list(self.map.keys())
 
     def lookup(self, name):
         return self.map[name]

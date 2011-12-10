@@ -20,9 +20,9 @@ buf = ""
 while True:
     try:
         if buf != "":
-            line = raw_input("  ")
+            line = input("  ")
         else:
-            line = raw_input("% ")
+            line = input("% ")
     except EOFError:
         break
     if line == "":
