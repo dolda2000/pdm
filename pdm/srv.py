@@ -365,7 +365,7 @@ def listen(spec):
         mode = 0o600
         group = None
         if len(parts) > 1:
-            mode = int(parts[1], 0)
+            mode = int(parts[1], 8)
         if len(parts) > 2:
             group = parts[2]
         ret = unixlistener(parts[0], mode = mode, group = group)
