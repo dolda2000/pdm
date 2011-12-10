@@ -78,7 +78,7 @@ class client(object):
 
 class replclient(client):
     def __init__(self, sk):
-        super(replclient, self).__init__(sk, "repl")
+        super().__init__(sk, "repl")
 
     def run(self, code):
         while True:
@@ -164,7 +164,7 @@ class perfproxy(object):
 
 class perfclient(client):
     def __init__(self, sk):
-        super(perfclient, self).__init__(sk, "perf")
+        super().__init__(sk, "perf")
         self.nextid = 0
         self.lock = threading.Lock()
         self.proxies = {}

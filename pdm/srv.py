@@ -242,7 +242,7 @@ protocols["perf"] = perf
 
 class client(threading.Thread):
     def __init__(self, sk):
-        super(client, self).__init__(name = "Management client")
+        super().__init__(name = "Management client")
         self.setDaemon(True)
         self.sk = sk
         self.handler = self
@@ -298,7 +298,7 @@ class client(threading.Thread):
 
 class listener(threading.Thread):
     def __init__(self):
-        super(listener, self).__init__(name = "Management listener")
+        super().__init__(name = "Management listener")
         self.setDaemon(True)
 
     def listen(self, sk):
@@ -320,7 +320,7 @@ class listener(threading.Thread):
 
 class unixlistener(listener):
     def __init__(self, name, mode = 0o600, group = None):
-        super(unixlistener, self).__init__()
+        super().__init__()
         self.name = name
         self.mode = mode
         self.group = group
@@ -345,7 +345,7 @@ class unixlistener(listener):
 
 class tcplistener(listener):
     def __init__(self, port, bindaddr = "127.0.0.1"):
-        super(tcplistener, self).__init__()
+        super().__init__()
         self.port = port
         self.bindaddr = bindaddr
 

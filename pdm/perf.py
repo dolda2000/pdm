@@ -6,14 +6,14 @@ class attrinfo(object):
 
 class perfobj(object):
     def __init__(self, *args, **kwargs):
-        super(perfobj, self).__init__()
+        super().__init__()
     
     def pdm_protocols(self):
         return []
 
 class simpleattr(perfobj):
     def __init__(self, func, info = None, *args, **kwargs):
-        super(simpleattr, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.func = func
         if info is None:
             info = attrinfo()
@@ -26,11 +26,11 @@ class simpleattr(perfobj):
         return self.info
 
     def pdm_protocols(self):
-        return super(simpleattr, self).pdm_protocols() + ["attr"]
+        return super().pdm_protocols() + ["attr"]
 
 class valueattr(perfobj):
     def __init__(self, init, info = None, *args, **kwargs):
-        super(valueattr, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.value = init
         if info is None:
             info = attrinfo()
@@ -43,12 +43,12 @@ class valueattr(perfobj):
         return self.info
 
     def pdm_protocols(self):
-        return super(valueattr, self).pdm_protocols() + ["attr"]
+        return super().pdm_protocols() + ["attr"]
 
 
 class eventobj(perfobj):
     def __init__(self, *args, **kwargs):
-        super(eventobj, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.subscribers = set()
 
     def subscribe(self, cb):
@@ -66,11 +66,11 @@ class eventobj(perfobj):
             except: pass
 
     def pdm_protocols(self):
-        return super(eventobj, self).pdm_protocols() + ["event"]
+        return super().pdm_protocols() + ["event"]
 
 class staticdir(perfobj):
     def __init__(self, *args, **kwargs):
-        super(staticdir, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.map = {}
 
     def __setitem__(self, name, ob):
@@ -92,7 +92,7 @@ class staticdir(perfobj):
         return self.map[name]
 
     def pdm_protocols(self):
-        return super(staticdir, self).pdm_protocols() + ["dir"]
+        return super().pdm_protocols() + ["dir"]
 
 class event(object):
     def __init__(self):
@@ -113,7 +113,7 @@ def getprocid():
 
 class procevent(event):
     def __init__(self, id):
-        super(procevent, self).__init__()
+        super().__init__()
         if isinstance(id, procevent):
             self.id = id.id
         else:
@@ -121,11 +121,11 @@ class procevent(event):
 
 class startevent(procevent):
     def __init__(self):
-        super(startevent, self).__init__(getprocid())
+        super().__init__(getprocid())
 
 class finishevent(procevent):
     def __init__(self, start, aborted):
-        super(finishevent, self).__init__(start)
+        super().__init__(start)
         self.aborted = aborted
 
 sysres = staticdir()
