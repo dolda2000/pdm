@@ -150,8 +150,13 @@ class perfproxy(object):
             except: pass
 
     def close(self):
-        self.cl.run("unbind", self.id)
-        del self.cl.proxies[self.id]
+        if self.id is not None:
+            self.cl.run("unbind", self.id)
+            del self.cl.proxies[self.id]
+            self.id = None
+
+    def __del__(self):
+        self.close()
 
     def __enter__(self):
         return self
