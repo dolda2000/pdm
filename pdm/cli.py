@@ -47,6 +47,9 @@ class client(object):
     def close(self):
         self.sk.close()
 
+    def fileno(self):
+        return self.sk.fileno()
+
     def readline(self):
         while True:
             p = self.buf.find(b"\n")
