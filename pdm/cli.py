@@ -6,7 +6,7 @@ provided in the pdm.srv module.
 
 import socket, pickle, struct, select, threading
 
-__all__ = ["client", "replclient"]
+__all__ = ["client", "replclient", "perfclient"]
 
 class protoerr(Exception):
     pass
