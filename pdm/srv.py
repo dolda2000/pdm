@@ -19,9 +19,9 @@ class repl(object):
     """REPL protocol handler
     
     Provides a read-eval-print loop. The primary client-side interface
-    is the pdm.cli.replclient class. Clients can send arbitrary code,
-    which is compiled and run on its own thread in the server process,
-    and output responses that are echoed back to the client.
+    is the L{pdm.cli.replclient} class. Clients can send arbitrary
+    code, which is compiled and run on its own thread in the server
+    process, and output responses that are echoed back to the client.
 
     Each client is provided with its own module, in which the code
     runs. The module is prepared with a function named `echo', which
@@ -98,12 +98,12 @@ class perf(object):
     already be imported. PDM will not import new modules for clients;
     rather, the daemon process needs to import all modules that
     clients should be able to interact with. PDM itself always imports
-    the pdm.perf module, which contains a few basic PERF objects. See
-    its documentation for details.
+    the L{pdm.perf} module, which contains a few basic PERF
+    objects. See its documentation for details.
 
     The following interfaces are currently known to PERF.
 
-     * attr:
+     - attr:
        An object that implements the `attr' interface models an
        attribute that can be read by clients. The attribute can be
        anything, as long as its representation can be
@@ -117,9 +117,9 @@ class perf(object):
        description of the attribute. Both should be
        idempotent. `readattr' can return any pickleable object, and
        `attrinfo' should return either None to indicate that it has no
-       description, or an instance of the pdm.perf.attrinfo class.
+       description, or an instance of the L{pdm.perf.attrinfo} class.
 
-     * dir:
+     - dir:
        The `dir' interface models a directory of other PERF
        objects. An object implementing it must implement methods
        called `lookup' and `listdir'. `lookup' is called with a single
@@ -130,7 +130,7 @@ class perf(object):
        used as argument to `lookup', but the list is not required to
        be exhaustive and may also be empty.
 
-     * invoke:
+     - invoke:
        The `invoke' interface allows a more arbitrary form of method
        calls to objects implementing it. Such objects must implement a
        method called `invoke', which is called with one positional
@@ -141,7 +141,7 @@ class perf(object):
        the client. In case the method name is not recognized, `invoke'
        should raise an AttributeError.
 
-     * event:
+     - event:
        The `event' interface allows PERF objects to notify clients of
        events asynchronously. Objects implementing it must implement
        methods called `subscribe' and `unsubscribe'. `subscribe' will
@@ -151,7 +151,7 @@ class perf(object):
        `event' object should then call all such registered callables
        with a single argument describing the event. The argument could
        be any object that can be pickled, but should be an instance of
-       a subclass of the pdm.perf.event class. If `subscribe' is
+       a subclass of the L{pdm.perf.event} class. If `subscribe' is
        called with a callback object that it has already registered,
        it should raise a ValueError. `unsubscribe' is called with a
        single argument, which is a previously registered callback
@@ -160,12 +160,12 @@ class perf(object):
        object is not, in fact, registered, a ValueError should be
        raised.
 
-    The pdm.perf module contains a few convenience classes which
+    The L{pdm.perf} module contains a few convenience classes which
     implements the interfaces, but PERF objects are not required to be
     instances of them. Any object can implement a PERF interface, as
     long as it does so as described above.
 
-    The pdm.cli.perfclient class is the client-side implementation.
+    The L{pdm.cli.perfclient} class is the client-side implementation.
     """
     def __init__(self, cl):
         self.cl = cl

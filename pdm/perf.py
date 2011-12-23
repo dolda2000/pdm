@@ -5,35 +5,44 @@ for implementing PERF interfaces in common ways, and uses those
 classes to implement some standard PERF objects that can be used by
 PERF clients connecting to any PERF server.
 
-See the documentation for pdm.srv.perf for a description of the
+See the documentation for L{pdm.srv.perf} for a description of the
 various PERF interfaces.
 
 It contains two named PERF objects:
 
- * sysres -- A directory containing the following objects pertaining
-             to the resource usage of the server process:
-   * realtime -- An attribute returning the amount of real time
-                 since the PDM module was imported (which likely
-                 coincides with the amount of time the server process
-                 has been running).
-   * cputime  -- An attribute returning the amount of CPU time
-                 consumed by the server process (in both user and
-                 kernel mode).
-   * utime    -- An attribute returning the amount of CPU time the
-                 server process has spent in user mode.
-   * stime    -- An attribute returning the amount of CPU time the
-                 server process has spent in kernel mode.
-   * maxrss   -- An attribute returning the largest resident set size
-                 the server process has used during its lifetime.
-   * rusage   -- An attribute returning the current rusage of the
-                 server process.
-* sysinfo -- A directory containing the following objects pertaining
-             to the environment of the server process:
-   * pid      -- An attribute returning the PID of the server process.
-   * uname    -- An attribute returning the uname information of the
-                 system.
-   * hostname -- An attribute returning the hostname of the system.
-   * platform -- An attribute returning the Python build platform.
+ - sysres -- A directory containing the following objects pertaining
+   to the resource usage of the server process:
+
+    - realtime -- An attribute returning the amount of real time since
+      the PDM module was imported (which likely coincides with the
+      amount of time the server process has been running).
+
+    - cputime -- An attribute returning the amount of CPU time
+      consumed by the server process (in both user and kernel mode).
+
+    - utime -- An attribute returning the amount of CPU time the
+      server process has spent in user mode.
+
+    - stime -- An attribute returning the amount of CPU time the
+      server process has spent in kernel mode.
+
+    - maxrss -- An attribute returning the largest resident set size
+      the server process has used during its lifetime.
+
+    - rusage -- An attribute returning the current rusage of the
+      server process.
+
+ - sysinfo -- A directory containing the following objects pertaining
+   to the environment of the server process:
+
+    - pid -- An attribute returning the PID of the server process.
+
+    - uname -- An attribute returning the uname information of the
+      system.
+
+    - hostname -- An attribute returning the hostname of the system.
+
+    - platform -- An attribute returning the Python build platform.
 """
 
 import os, sys, resource, time, socket, threading
@@ -44,7 +53,7 @@ __all__ = ["attrinfo", "simpleattr", "valueattr", "eventobj",
 
 class attrinfo(object):
     """The return value of the `attrinfo' method on `attr' objects as
-    described in pdm.srv.perf.
+    described in L{pdm.srv.perf}.
 
     Currently contains a single data field, `desc', which should have
     a human-readable description of the purpose of the attribute.
