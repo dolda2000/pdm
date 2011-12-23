@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name = "pdm",
-      version = "0.1",
+      version = "0.2",
       description = "Python daemon management library",
       author = "Fredrik Tolf",
       author_email = "fredrik@dolda2000.com",
