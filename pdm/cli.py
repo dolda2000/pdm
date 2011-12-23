@@ -1,7 +1,9 @@
-"""Management for daemon processes
+"""Python Daemon Management -- Client functions
 
-This module provides some client support for the daemon management
-provided in the pdm.srv module.
+This module implements the client part of the PDM protocols. The
+primary objects of interest are the replclient and perfclient classes,
+which implement support for their respective protocols. See their
+documentation for details.
 """
 
 import socket, pickle, struct, select, threading
@@ -315,6 +317,11 @@ class perfclient(client):
         of the slash. For instance, find("pdm.perf.sysres/cputime")
         will return the built-in attribute for reading the CPU time
         used by the server process.
+
+        The proxy objects returned by this function are cached and the
+        same object are returned the next time the same name is
+        requested, which means that they are kept live until the
+        client connection is closed.
         """
         ret = self.names.get(name)
         if ret is None:
