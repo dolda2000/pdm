@@ -6,9 +6,10 @@ provided in the pdm.srv module.
 
 import socket, pickle, struct, select, threading
 
-__all__ = ["client", "replclient"]
+__all__ = ["client", "replclient", "perfclient"]
 
 class protoerr(Exception):
+    """Raised on protocol errors"""
     pass
 
 def resolve(spec):
@@ -35,7 +36,26 @@ def resolve(spec):
     return rv
 
 class client(object):
+    """PDM client
+
+    This class provides general facilities to speak to PDM servers,
+    and is mainly intended to be subclassed to provide for the
+    specific protocols, such as replclient and perfclient do.
+
+    `client' instances can be passed as arguments to select.select(),
+    and can be used in `with' statements.
+    """
     def __init__(self, sk, proto = None):
+        """Create a client object connected to the specified
+        server. `sk' can either be a socket object, which is used as
+        it is, or a string specification very similar to the
+        specification for pdm.srv.listen, so see its documentation for
+        details. The differences are only that this function does not
+        take arguments specific to socket creation, like the mode and
+        group arguments for Unix sockets. If `proto' is given, that
+        subprotocol will negotiated with the server (by calling the
+        select() method).
+        """
         self.sk = resolve(sk)
         self.buf = b""
         line = self.readline()
@@ -45,12 +65,15 @@ class client(object):
             self.select(proto)
 
     def close(self):
+        """Close this connection"""
         self.sk.close()
 
     def fileno(self):
+        """Return the file descriptor of the underlying socket."""
         return self.sk.fileno()
 
     def readline(self):
+        """Read a single NL-terminated line and return it."""
         while True:
             p = self.buf.find(b"\n")
             if p >= 0:
@@ -63,6 +86,7 @@ class client(object):
             self.buf += ret
 
     def select(self, proto):
+        """Negotiate the given subprotocol with the server"""
         if isinstance(proto, str):
             proto = proto.encode("ascii")
         if b"\n" in proto:
@@ -80,10 +104,20 @@ class client(object):
         return False
 
 class replclient(client):
+    """REPL protocol client
+    
+    Implements the client side of the REPL protocol; see pdm.srv.repl
+    for details on the protocol and its functionality.
+    """
     def __init__(self, sk):
+        """Create a connected client as documented in the `client' class."""
         super().__init__(sk, "repl")
 
     def run(self, code):
+        """Run a single block of Python code on the server. Returns
+        the output of the command (as documented in pdm.srv.repl) as a
+        string.
+        """
         while True:
             ncode = code.replace("\n\n", "\n")
             if ncode == code: break
@@ -155,8 +189,13 @@ class perfproxy(object):
             except: pass
 
     def close(self):
-        self.cl.run("unbind", self.id)
-        del self.cl.proxies[self.id]
+        if self.id is not None:
+            self.cl.run("unbind", self.id)
+            del self.cl.proxies[self.id]
+            self.id = None
+
+    def __del__(self):
+        self.close()
 
     def __enter__(self):
         return self
@@ -166,7 +205,24 @@ class perfproxy(object):
         return False
 
 class perfclient(client):
+    """PERF protocol client
+    
+    Implements the client side of the PERF protocol; see pdm.srv.perf
+    for details on the protocol and its functionality.
+
+    This client class implements functions for finding PERF objects on
+    the server, and returns, for each server-side object looked up, a
+    proxy object that mimics exactly the PERF interfaces that the
+    object implements. As the proxy objects reference live objects on
+    the server, they should be released when they are no longer used;
+    they implement a close() method for that purpose, and can also be
+    used in `with' statements.
+
+    See pdm.srv.perf for details on the various PERF interfaces that
+    the proxy objects might implement.
+    """
     def __init__(self, sk):
+        """Create a connected client as documented in the `client' class."""
         super().__init__(sk, "perf")
         self.nextid = 0
         self.lock = threading.Lock()
@@ -196,6 +252,12 @@ class perfclient(client):
         proxy.notify(ev)
 
     def dispatch(self, timeout = None):
+        """Wait for an incoming notification from the server, and
+        dispatch it to the callback functions that have been
+        registered for it. If `timeout' is specified, wait no longer
+        than so many seconds; otherwise, wait forever. This client
+        object may also be used as argument to select.select().
+        """
         rfd, wfd, efd = select.select([self.sk], [], [], timeout)
         if self.sk in rfd:
             msg = self.recv()
@@ -227,6 +289,10 @@ class perfclient(client):
             self.lock.release()
 
     def lookup(self, module, obnm):
+        """Look up a single server-side object by the given name in
+        the given module. Will return a new proxy object for each
+        call when called multiple times for the same name.
+        """
         self.lock.acquire()
         try:
             id = self.nextid
@@ -239,6 +305,17 @@ class perfclient(client):
         return proxy
 
     def find(self, name):
+        """Convenience function for looking up server-side objects
+        through PERF directories and for multiple uses. The object
+        name can be given as "MODULE.OBJECT", which will look up the
+        named OBJECT in the named MODULE, and can be followed by any
+        number of slash-separated names, which will assume that the
+        object to the left of the slash is a PERF directory, and will
+        return the object in that directory by the name to the right
+        of the slash. For instance, find("pdm.perf.sysres/cputime")
+        will return the built-in attribute for reading the CPU time
+        used by the server process.
+        """
         ret = self.names.get(name)
         if ret is None:
             if "/" in name:
