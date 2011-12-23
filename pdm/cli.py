@@ -51,12 +51,12 @@ class client(object):
         """Create a client object connected to the specified
         server. `sk' can either be a socket object, which is used as
         it is, or a string specification very similar to the
-        specification for pdm.srv.listen, so see its documentation for
-        details. The differences are only that this function does not
-        take arguments specific to socket creation, like the mode and
-        group arguments for Unix sockets. If `proto' is given, that
-        subprotocol will negotiated with the server (by calling the
-        select() method).
+        specification for L{pdm.srv.listen}, so see its documentation
+        for details. The differences are only that this function does
+        not take arguments specific to socket creation, like the mode
+        and group arguments for Unix sockets. If `proto' is given,
+        that subprotocol will negotiated with the server (by calling
+        the select() method).
         """
         self.sk = resolve(sk)
         self.buf = ""
@@ -106,8 +106,8 @@ class client(object):
 class replclient(client):
     """REPL protocol client
     
-    Implements the client side of the REPL protocol; see pdm.srv.repl
-    for details on the protocol and its functionality.
+    Implements the client side of the REPL protocol; see
+    L{pdm.srv.repl} for details on the protocol and its functionality.
     """
     def __init__(self, sk):
         """Create a connected client as documented in the `client' class."""
@@ -115,8 +115,8 @@ class replclient(client):
 
     def run(self, code):
         """Run a single block of Python code on the server. Returns
-        the output of the command (as documented in pdm.srv.repl) as a
-        string.
+        the output of the command (as documented in L{pdm.srv.repl})
+        as a string.
         """
         while True:
             ncode = code.replace("\n\n", "\n")
@@ -207,8 +207,8 @@ class perfproxy(object):
 class perfclient(client):
     """PERF protocol client
     
-    Implements the client side of the PERF protocol; see pdm.srv.perf
-    for details on the protocol and its functionality.
+    Implements the client side of the PERF protocol; see
+    L{pdm.srv.perf} for details on the protocol and its functionality.
 
     This client class implements functions for finding PERF objects on
     the server, and returns, for each server-side object looked up, a
@@ -218,8 +218,8 @@ class perfclient(client):
     they implement a close() method for that purpose, and can also be
     used in `with' statements.
 
-    See pdm.srv.perf for details on the various PERF interfaces that
-    the proxy objects might implement.
+    See L{pdm.srv.perf} for details on the various PERF interfaces
+    that the proxy objects might implement.
     """
     def __init__(self, sk):
         """Create a connected client as documented in the `client' class."""
