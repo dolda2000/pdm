@@ -124,7 +124,7 @@ class startevent(procevent):
         super(startevent, self).__init__(getprocid())
 
 class finishevent(procevent):
-    def __init__(self, start, aborted):
+    def __init__(self, start, aborted = False):
         super(finishevent, self).__init__(start)
         self.aborted = aborted
 
