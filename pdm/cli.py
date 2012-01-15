@@ -19,16 +19,21 @@ def resolve(spec):
         return spec
     sk = None
     try:
-        if "/" in spec:
+        if ":" in spec:
+            p = spec.rindex(":")
+            first, second = spec[:p], spec[p + 1:]
+            if "/" in second:
+                import sshsock
+                sk = sshsock.sshsocket(first, second)
+            else:
+                sk = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sk.connect((first, second))
+        elif "/" in spec:
             sk = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sk.connect(spec)
         elif spec.isdigit():
             sk = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sk.connect(("localhost", int(spec)))
-        elif ":" in spec:
-            sk = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            p = spec.rindex(":")
-            sk.connect((spec[:p], int(spec[p + 1:])))
         else:
             raise Exception("Unknown target specification %r" % spec)
         rv = sk
