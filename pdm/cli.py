@@ -23,7 +23,7 @@ def resolve(spec):
             p = spec.rindex(":")
             first, second = spec[:p], spec[p + 1:]
             if "/" in second:
-                import sshsock
+                from . import sshsock
                 sk = sshsock.sshsocket(first, second)
             else:
                 sk = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
