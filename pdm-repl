@@ -14,7 +14,11 @@ for o, a in opts:
 if len(args) < 1:
     usage(sys.stderr)
     sys.exit(1)
-cl = pdm.cli.replclient(args[0])
+try:
+    cl = pdm.cli.replclient(args[0])
+except Exception as e:
+    sys.stderr.write("%s: %s\n" % (args[0], e))
+    sys.exit(1)
 
 buf = ""
 while True:
