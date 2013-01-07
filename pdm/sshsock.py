@@ -12,6 +12,30 @@ class sshsocket(object):
         args += ["python3", "-m", "pdm.sshsock", path]
         self.proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
         fcntl.fcntl(self.proc.stdout, fcntl.F_SETFL, fcntl.fcntl(self.proc.stdout, fcntl.F_GETFL) | os.O_NONBLOCK)
+        head = self.recv(5)
+        if head != b"SSOCK":
+            raise socket.error("unexpected reply from %s: %r" % (host, head))
+        head = self.recv(1)
+        if head == b"+":
+            buf = b""
+            while True:
+                r = self.recv(1)
+                if r == b"":
+                    raise socket.error("unexpected EOF in SSH socket stream")
+                elif r == b"\n":
+                    break
+                buf += r
+            return
+        elif head == b"-":
+            buf = b""
+            while True:
+                r = self.recv(1)
+                if r in {b"\n", b""}:
+                    break
+                buf += r
+            raise socket.error(buf.decode("utf-8"))
+        else:
+            raise socket.error("unexpected reply from %s: %r" % (host, head))
 
     def close(self):
         if self.proc is not None:
@@ -39,7 +63,12 @@ def cli():
     fcntl.fcntl(sys.stdin.buffer, fcntl.F_SETFL, fcntl.fcntl(sys.stdin.buffer, fcntl.F_GETFL) | os.O_NONBLOCK)
     sk = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     try:
-        sk.connect(sys.argv[1])
+        try:
+            sk.connect(sys.argv[1])
+        except socket.error as err:
+            sys.stdout.write("SSOCK-connect: %s\n" % err)
+            return
+        sys.stdout.write("SSOCK+\n")
         buf1 = b""
         buf2 = b""
         while True:
