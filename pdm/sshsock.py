@@ -17,6 +17,14 @@ class sshsocket(object):
             raise socket.error("unexpected reply from %s: %r" % (host, head))
         head = self.recv(1)
         if head == "+":
+            buf = ""
+            while True:
+                r = self.recv(1)
+                if r == "":
+                    raise socket.error("unexpected EOF in SSH socket stream")
+                elif r == "\n":
+                    break
+                buf += r
             return
         elif head == "-":
             buf = ""
