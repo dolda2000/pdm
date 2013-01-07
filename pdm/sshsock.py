@@ -67,8 +67,10 @@ def cli():
             sk.connect(sys.argv[1])
         except socket.error as err:
             sys.stdout.write("SSOCK-connect: %s\n" % err)
+            sys.stdout.flush()
             return
         sys.stdout.write("SSOCK+\n")
+        sys.stdout.flush()
         buf1 = b""
         buf2 = b""
         while True:
