@@ -8,9 +8,9 @@ import sys, traceback, threading
 
 def threads():
     "Returns a dict of currently known threads, mapped to their respective frames."
-    tt = dict((th.ident, th) for th in threading.enumerate())
-    return dict((tt.get(key, key), val) for key, val in sys._current_frames().iteritems())
+    tt = {th.ident: th for th in threading.enumerate()}
+    return {tt.get(key, key): val for key, val in sys._current_frames().items()}
 
 def traces():
     "Returns the value of threads() with each frame expanded to a backtrace."
-    return dict((th, traceback.extract_stack(frame)) for th, frame in threads().iteritems())
+    return {th: traceback.extract_stack(frame) for th, frame in threads().items()}
