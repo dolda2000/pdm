@@ -17,35 +17,17 @@ It contains two named PERF objects:
       the PDM module was imported (which likely coincides with the
       amount of time the server process has been running).
 
-    - cputime -- An attribute returning the amount of CPU time
-      consumed by the server process (in both user and kernel mode).
-
-    - utime -- An attribute returning the amount of CPU time the
-      server process has spent in user mode.
-
-    - stime -- An attribute returning the amount of CPU time the
-      server process has spent in kernel mode.
-
-    - maxrss -- An attribute returning the largest resident set size
-      the server process has used during its lifetime.
-
-    - rusage -- An attribute returning the current rusage of the
-      server process.
-
  - sysinfo -- A directory containing the following objects pertaining
    to the environment of the server process:
 
     - pid -- An attribute returning the PID of the server process.
-
-    - uname -- An attribute returning the uname information of the
-      system.
 
     - hostname -- An attribute returning the hostname of the system.
 
     - platform -- An attribute returning the Python build platform.
 """
 
-import os, sys, resource, time, socket, threading
+import os, sys, time, socket, threading
 
 __all__ = ["attrinfo", "simpleattr", "valueattr", "eventobj",
            "staticdir", "event", "procevent", "startevent",
@@ -232,19 +214,9 @@ class finishevent(procevent):
 
 sysres = staticdir()
 itime = time.time()
-ires = resource.getrusage(resource.RUSAGE_SELF)
-def ct():
-    ru = resource.getrusage(resource.RUSAGE_SELF)
-    return (ru.ru_utime - ires.ru_utime) + (ru.ru_stime - ires.ru_stime)
 sysres["realtime"] = simpleattr(func = lambda: time.time() - itime)
-sysres["cputime"] = simpleattr(func = ct)
-sysres["utime"] = simpleattr(func = lambda: resource.getrusage(resource.RUSAGE_SELF).ru_utime - ires.ru_utime)
-sysres["stime"] = simpleattr(func = lambda: resource.getrusage(resource.RUSAGE_SELF).ru_stime - ires.ru_stime)
-sysres["maxrss"] = simpleattr(func = lambda: resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-sysres["rusage"] = simpleattr(func = lambda: resource.getrusage(resource.RUSAGE_SELF))
 
 sysinfo = staticdir()
 sysinfo["pid"] = simpleattr(func = os.getpid)
-sysinfo["uname"] = simpleattr(func = os.uname)
 sysinfo["hostname"] = simpleattr(func = socket.gethostname)
 sysinfo["platform"] = valueattr(init = sys.platform)
