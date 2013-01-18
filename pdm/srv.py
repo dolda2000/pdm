@@ -465,6 +465,7 @@ class unixlistener(listener):
             if self.group is not None:
                 os.chown(self.name, os.getuid(), grp.getgrnam(self.group).gr_gid)
             sk.listen(16)
+            sk.setblocking(False)
             self.listen(sk)
         finally:
             sk.close()
@@ -487,6 +488,7 @@ class tcplistener(listener):
         try:
             sk.bind((self.bindaddr, self.port))
             sk.listen(16)
+            sk.setblocking(False)
             self.listen(sk)
         finally:
             sk.close()
