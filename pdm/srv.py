@@ -61,8 +61,10 @@ class repl(object):
                 self.echo(eval(ccode, self.mod.__dict__))
                 self.cl.send("+OK\n")
         except:
-            for line in traceback.format_exception(*sys.exc_info()):
-                self.cl.send(" " + line)
+            lines = ("".join(traceback.format_exception(*sys.exc_info()))).split("\n")
+            while len(lines) > 0 and lines[-1] == "": lines = lines[:-1]
+            for line in lines:
+                self.cl.send(" " + line + "\n")
             self.cl.send("+EXC\n")
 
     def handle(self, buf):
