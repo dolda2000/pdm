@@ -45,7 +45,7 @@ It contains two named PERF objects:
     - platform -- An attribute returning the Python build platform.
 """
 
-import os, sys, resource, time, socket, threading
+import os, sys, time, socket, threading
 
 __all__ = ["attrinfo", "simpleattr", "valueattr", "eventobj",
            "staticdir", "event", "procevent", "startevent",
@@ -232,16 +232,21 @@ class finishevent(procevent):
 
 sysres = staticdir()
 itime = time.time()
-ires = resource.getrusage(resource.RUSAGE_SELF)
-def ct():
-    ru = resource.getrusage(resource.RUSAGE_SELF)
-    return (ru.ru_utime - ires.ru_utime) + (ru.ru_stime - ires.ru_stime)
 sysres["realtime"] = simpleattr(func = lambda: time.time() - itime)
-sysres["cputime"] = simpleattr(func = ct)
-sysres["utime"] = simpleattr(func = lambda: resource.getrusage(resource.RUSAGE_SELF).ru_utime - ires.ru_utime)
-sysres["stime"] = simpleattr(func = lambda: resource.getrusage(resource.RUSAGE_SELF).ru_stime - ires.ru_stime)
-sysres["maxrss"] = simpleattr(func = lambda: resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-sysres["rusage"] = simpleattr(func = lambda: resource.getrusage(resource.RUSAGE_SELF))
+try:
+    import resource
+except ImportError:
+    pass
+else:
+    ires = resource.getrusage(resource.RUSAGE_SELF)
+    def ct():
+        ru = resource.getrusage(resource.RUSAGE_SELF)
+        return (ru.ru_utime - ires.ru_utime) + (ru.ru_stime - ires.ru_stime)
+    sysres["cputime"] = simpleattr(func = ct)
+    sysres["utime"] = simpleattr(func = lambda: resource.getrusage(resource.RUSAGE_SELF).ru_utime - ires.ru_utime)
+    sysres["stime"] = simpleattr(func = lambda: resource.getrusage(resource.RUSAGE_SELF).ru_stime - ires.ru_stime)
+    sysres["maxrss"] = simpleattr(func = lambda: resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    sysres["rusage"] = simpleattr(func = lambda: resource.getrusage(resource.RUSAGE_SELF))
 
 sysinfo = staticdir()
 sysinfo["pid"] = simpleattr(func = os.getpid)
