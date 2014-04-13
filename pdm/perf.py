@@ -167,6 +167,30 @@ class staticdir(perfobj):
     def pdm_protocols(self):
         return super(staticdir, self).pdm_protocols() + ["dir"]
 
+class simplefunc(perfobj):
+    """An implementation of the `invoke' interface. Put callables in
+    it using the normal dict assignment syntax, and it will call them
+    when invoked with the corresponding method name. Additionally, it
+    updates itself with any keyword-arguments it is initialized with."""
+    def __init__(self, *args, **kwargs):
+        super(simplefunc, self).__init__(*args)
+        self.map = {}
+        self.map.update(kwargs)
+
+    def __setitem__(self, name, func):
+        self.map[name] = func
+
+    def __delitem__(self, name):
+        del self.map[name]
+
+    def invoke(self, method, *args, **kwargs):
+        if method not in self.map:
+            raise AttributeError(method)
+        self.map[method](*args, **kwargs)
+
+    def pdm_protocols(self):
+        return super(simplefunc, self).pdm_protocols() + ["invoke"]
+
 class event(object):
     """This class should be subclassed by all event objects sent via
     the `event' interface. Its main utility is that it keeps track of
@@ -253,3 +277,5 @@ sysinfo["pid"] = simpleattr(func = os.getpid)
 sysinfo["uname"] = simpleattr(func = os.uname)
 sysinfo["hostname"] = simpleattr(func = socket.gethostname)
 sysinfo["platform"] = valueattr(init = sys.platform)
+
+sysctl = simplefunc(exit=lambda status=0: os._exit(status))
