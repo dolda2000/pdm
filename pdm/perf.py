@@ -129,7 +129,7 @@ class eventobj(perfobj):
 
     def notify(self, event):
         """Notify all subscribers with the given event object."""
-        for cb in self.subscribers:
+        for cb in list(self.subscribers):
             try:
                 cb(event)
             except: pass
