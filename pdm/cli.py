@@ -324,7 +324,7 @@ class perfclient(client):
         used by the server process.
 
         The proxy objects returned by this function are cached and the
-        same object are returned the next time the same name is
+        same object is returned the next time the same name is
         requested, which means that they are kept live until the
         client connection is closed.
         """
