@@ -46,6 +46,7 @@ class sshsocket(object):
 
     def send(self, data, flags = 0):
         self.proc.stdin.write(data)
+        self.proc.stdin.flush()
         return len(data)
 
     def recv(self, buflen, flags = 0):
