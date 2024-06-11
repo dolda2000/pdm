@@ -71,13 +71,19 @@ class client(object):
         if proto is not None:
             self.select(proto)
 
+    @property
+    def closed(self):
+        return self.sk is None
+
     def close(self):
         """Close this connection"""
-        self.sk.close()
+        if self.sk is not None:
+            self.sk.close()
+            self.sk = None
 
     def fileno(self):
         """Return the file descriptor of the underlying socket."""
-        return self.sk.fileno()
+        return self.sk.fileno() if self.sk else None
 
     def readline(self):
         """Read a single NL-terminated line and return it."""
@@ -197,7 +203,8 @@ class perfproxy(object):
 
     def close(self):
         if self.id is not None:
-            self.cl.run("unbind", self.id)
+            if not self.cl.closed:
+                self.cl.run("unbind", self.id)
             del self.cl.proxies[self.id]
             self.id = None
 
