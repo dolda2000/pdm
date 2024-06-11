@@ -278,4 +278,12 @@ sysinfo["uname"] = simpleattr(func = os.uname)
 sysinfo["hostname"] = simpleattr(func = socket.gethostname)
 sysinfo["platform"] = valueattr(init = sys.platform)
 
-sysctl = simplefunc(exit=lambda status=0: os._exit(status))
+def reload(modname):
+    mod = sys.modules.get(modname)
+    if mod is None:
+        raise ValueError(modname)
+    import importlib
+    importlib.reload(mod)
+
+sysctl = simplefunc(exit=lambda status=0: os._exit(status),
+                    reload=reload)
