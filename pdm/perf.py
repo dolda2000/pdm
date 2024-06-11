@@ -51,6 +51,13 @@ __all__ = ["attrinfo", "simpleattr", "valueattr", "eventobj",
            "staticdir", "event", "procevent", "startevent",
            "finishevent"]
 
+class error(Exception):
+    pass
+class nosuchname(LookupError, error):
+    pass
+class nosuchproto(error):
+    pass
+
 class attrinfo(object):
     """The return value of the `attrinfo' method on `attr' objects as
     described in L{pdm.srv.perf}.

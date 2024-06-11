@@ -10,6 +10,7 @@ which describes the functioning of the REPL and PERF protocols.
 import os, sys, socket, threading, grp, select
 import types, pprint, traceback
 import pickle, struct
+from . import perf as mperf
 
 __all__ = ["repl", "perf", "listener", "unixlistener", "tcplistener", "listen"]
 
@@ -197,7 +198,7 @@ class perf(object):
 
     def bindob(self, id, ob):
         if not hasattr(ob, "pdm_protocols"):
-            raise ValueError("Object does not support PDM introspection")
+            raise mperf.nosuchname("Object does not support PDM introspection")
         try:
             proto = ob.pdm_protocols()
         except Exception as exc:
@@ -208,12 +209,12 @@ class perf(object):
     def bind(self, id, module, obnm):
         resmod = sys.modules.get(module)
         if resmod is None:
-            self.send("-", ImportError("No such module: %s" % module))
+            self.send("-", mperf.nosuchname("No such module: %s" % module))
             return
         try:
             ob = getattr(resmod, obnm)
         except AttributeError:
-            self.send("-", AttributeError("No such object: %s" % obnm))
+            self.send("-", mperf.nosuchname("No such object: %s" % obnm))
             return
         try:
             proto = self.bindob(id, ob)
@@ -229,7 +230,7 @@ class perf(object):
             return None
         ob, protos = ob
         if proto not in protos:
-            self.send("-", ValueError("Object does not support that protocol"))
+            self.send("-", mperf.nosuchproto("Object does not support that protocol: " + proto))
             return None
         return ob
 
@@ -240,7 +241,7 @@ class perf(object):
         try:
             ob = src.lookup(obnm)
         except KeyError as exc:
-            self.send("-", exc)
+            self.send("-", mperf.nosuchname(obnm))
             return
         try:
             proto = self.bindob(tgtid, ob)
