@@ -11,6 +11,7 @@ class sshsocket(object):
         args += [host]
         args += ["python3", "-m", "pdm.sshsock", path]
         self.proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
+        self.inbuf = bytearray()
         fcntl.fcntl(self.proc.stdout, fcntl.F_SETFL, fcntl.fcntl(self.proc.stdout, fcntl.F_GETFL) | os.O_NONBLOCK)
         head = self.recv(5)
         if head != b"SSOCK":
@@ -50,9 +51,18 @@ class sshsocket(object):
         return len(data)
 
     def recv(self, buflen, flags = 0):
-        if (flags & socket.MSG_DONTWAIT) == 0:
-            select.select([self.proc.stdout], [], [])
-        return self.proc.stdout.read(buflen)
+        while len(self.inbuf) == 0:
+            try:
+                rv = os.read(self.proc.stdout.fileno(), max(4096, buflen))
+            except BlockingIOError:
+                if flags & socket.MSG_DONTWAIT:
+                    raise
+                select.select([self.proc.stdout], [], [])
+            else:
+                self.inbuf.extend(rv)
+        rv = bytes(self.inbuf[:buflen])
+        self.inbuf[:buflen] = b""
+        return rv
 
     def fileno(self):
         return self.proc.stdout.fileno()
