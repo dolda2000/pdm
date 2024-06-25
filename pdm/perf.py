@@ -193,7 +193,7 @@ class simplefunc(perfobj):
     def invoke(self, method, *args, **kwargs):
         if method not in self.map:
             raise AttributeError(method)
-        self.map[method](*args, **kwargs)
+        return self.map[method](*args, **kwargs)
 
     def pdm_protocols(self):
         return super().pdm_protocols() + ["invoke"]
